@@ -1,12 +1,26 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+import { serve, createClient } from "./deps.ts";
+
+interface RequestBody {
+  action: 'add' | 'remove';
+  article: {
+    title: string;
+    description: string;
+    url: string;
+    urlToImage: string;
+    source: {
+      name: string;
+    };
+    publishedAt: string;
+    author: string;
+  };
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -66,7 +80,7 @@ serve(async (req) => {
         .maybeSingle();
 
       if (error) {
-        if ((error as any).code === '23505') {
+        if (error.code === '23505') {
           return new Response(
             JSON.stringify({ message: 'Already bookmarked' }),
             { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

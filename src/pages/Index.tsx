@@ -84,7 +84,15 @@ const Index = () => {
       const { data, error } = await supabase.functions.invoke('get-bookmarks');
       if (error) throw error;
 
-      const bookmarkArticles = data.bookmarks.map((b: any) => ({
+      const bookmarkArticles = data.bookmarks.map((b: {
+        title: string;
+        description: string;
+        url: string;
+        url_to_image: string;
+        source_name: string;
+        published_at: string;
+        author: string;
+      }) => ({
         title: b.title,
         description: b.description,
         url: b.url,
@@ -95,14 +103,20 @@ const Index = () => {
       }));
 
       setBookmarks(bookmarkArticles);
-      try { localStorage.setItem(LS_KEY, JSON.stringify(bookmarkArticles)); } catch {}
+      try {
+        localStorage.setItem(LS_KEY, JSON.stringify(bookmarkArticles));
+      } catch {
+        // Ignore localStorage errors
+      }
     } catch (error) {
       console.error('Error loading bookmarks:', error);
       // Fallback to localStorage cache
       try {
         const cached = localStorage.getItem(LS_KEY);
         if (cached) setBookmarks(JSON.parse(cached));
-      } catch {}
+      } catch {
+        // Ignore localStorage errors
+      }
       toast({
         title: "Using offline bookmarks",
         description: "Server sync failed. Showing cached bookmarks.",

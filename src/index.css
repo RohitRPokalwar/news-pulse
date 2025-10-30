@@ -216,6 +216,7 @@ All colors MUST be HSL.
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
   }
 
   .line-clamp-2 {
@@ -223,6 +224,7 @@ All colors MUST be HSL.
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
   }
 
   .line-clamp-3 {
@@ -230,6 +232,7 @@ All colors MUST be HSL.
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
   }
 
   .line-clamp-4 {
@@ -237,6 +240,7 @@ All colors MUST be HSL.
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 4;
+    line-clamp: 4;
   }
 
   .line-clamp-none {
@@ -244,6 +248,7 @@ All colors MUST be HSL.
     display: block;
     -webkit-box-orient: horizontal;
     -webkit-line-clamp: none;
+    line-clamp: none;
   }
 
   /* Focus ring utilities */
