@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here.
 All colors MUST be HSL.
 */
 
@@ -40,17 +40,33 @@ All colors MUST be HSL.
 
     --news-gradient-start: 210 40% 98%;
     --news-gradient-end: 220 40% 96%;
-    
+
     --card-hover-shadow: 220 70% 25%;
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
-    
+
     /* Modern gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(220 70% 25%) 0%, hsl(15 85% 60%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(220 70% 25% / 0.95) 0%, hsl(15 85% 60% / 0.85) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(210 40% 98%) 100%);
-    --gradient-accent: linear-gradient(120deg, hsl(15 85% 60%) 0%, hsl(25 90% 65%) 100%);
-    
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(220 70% 25%) 0%,
+      hsl(15 85% 60%) 100%
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(220 70% 25% / 0.95) 0%,
+      hsl(15 85% 60% / 0.85) 100%
+    );
+    --gradient-card: linear-gradient(
+      180deg,
+      hsl(0 0% 100%) 0%,
+      hsl(210 40% 98%) 100%
+    );
+    --gradient-accent: linear-gradient(
+      120deg,
+      hsl(15 85% 60%) 0%,
+      hsl(25 90% 65%) 100%
+    );
+
     /* Shadow enhancements */
     --shadow-subtle: 0 2px 8px hsl(220 70% 25% / 0.08);
     --shadow-medium: 0 4px 16px hsl(220 70% 25% / 0.12);
@@ -95,20 +111,36 @@ All colors MUST be HSL.
     --border: 220 50% 20%;
     --input: 220 50% 20%;
     --ring: 210 40% 98%;
-    
+
     --news-gradient-start: 220 70% 8%;
     --news-gradient-end: 220 60% 10%;
-    
+
     --card-hover-shadow: 15 85% 60%;
     --success: 142 76% 36%;
     --success-foreground: 0 0% 100%;
-    
+
     /* Modern gradients - dark mode */
-    --gradient-primary: linear-gradient(135deg, hsl(210 40% 98%) 0%, hsl(15 85% 60%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(220 60% 15% / 0.95) 0%, hsl(15 85% 50% / 0.85) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(220 60% 12%) 0%, hsl(220 70% 10%) 100%);
-    --gradient-accent: linear-gradient(120deg, hsl(15 85% 60%) 0%, hsl(25 90% 65%) 100%);
-    
+    --gradient-primary: linear-gradient(
+      135deg,
+      hsl(210 40% 98%) 0%,
+      hsl(15 85% 60%) 100%
+    );
+    --gradient-hero: linear-gradient(
+      135deg,
+      hsl(220 60% 15% / 0.95) 0%,
+      hsl(15 85% 50% / 0.85) 100%
+    );
+    --gradient-card: linear-gradient(
+      180deg,
+      hsl(220 60% 12%) 0%,
+      hsl(220 70% 10%) 100%
+    );
+    --gradient-accent: linear-gradient(
+      120deg,
+      hsl(15 85% 60%) 0%,
+      hsl(25 90% 65%) 100%
+    );
+
     /* Shadow enhancements - dark mode */
     --shadow-subtle: 0 2px 8px hsl(0 0% 0% / 0.2);
     --shadow-medium: 0 4px 16px hsl(0 0% 0% / 0.3);
@@ -133,5 +165,158 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+      "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+      "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) hsl(var(--muted));
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+
+  /* Text truncation utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .line-clamp-4 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+  }
+
+  .line-clamp-none {
+    overflow: visible;
+    display: block;
+    -webkit-box-orient: horizontal;
+    -webkit-line-clamp: none;
+  }
+
+  /* Focus ring utilities */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background;
+  }
+
+  /* Animation delay utilities */
+  .animation-delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animation-delay-500 {
+    animation-delay: 500ms;
+  }
+
+  /* Custom gradient backgrounds */
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .bg-gradient-card {
+    background: var(--gradient-card);
+  }
+
+  .bg-gradient-accent {
+    background: var(--gradient-accent);
+  }
+
+  /* Custom shadow utilities */
+  .shadow-subtle {
+    box-shadow: var(--shadow-subtle);
+  }
+
+  .shadow-medium {
+    box-shadow: var(--shadow-medium);
+  }
+
+  .shadow-strong {
+    box-shadow: var(--shadow-strong);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Text gradient utilities */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  /* Backdrop blur utilities */
+  .backdrop-blur-subtle {
+    backdrop-filter: blur(8px);
+  }
+
+  .backdrop-blur-medium {
+    backdrop-filter: blur(12px);
+  }
+
+  .backdrop-blur-strong {
+    backdrop-filter: blur(20px);
   }
 }
