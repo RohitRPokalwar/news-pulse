@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuthNew";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,20 +14,20 @@ const passwordSchema = z.string().min(6, "Password must be at least 6 characters
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, signIn, signUp } = useAuth();
 
   useEffect(() => {
     // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/");
-      }
-    });
-  }, [navigate]);
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const validateForm = () => {
     try {
@@ -48,32 +48,21 @@ const Auth = () => {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setLoading(true);
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const result = await signIn(email, password);
 
-        if (error) {
-          if (error.message.includes("Invalid login credentials")) {
-            toast({
-              title: "Login Failed",
-              description: "Invalid email or password. Please try again.",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Error",
-              description: error.message,
-              variant: "destructive",
-            });
-          }
+        if (!result.success) {
+          toast({
+            title: "Login Failed",
+            description: result.error || "Invalid email or password. Please try again.",
+            variant: "destructive",
+          });
           return;
         }
 
@@ -83,16 +72,10 @@ const Auth = () => {
         });
         navigate("/");
       } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-          },
-        });
+        const result = await signUp(username, email, password);
 
-        if (error) {
-          if (error.message.includes("already registered")) {
+        if (!result.success) {
+          if (result.error?.includes("already exists")) {
             toast({
               title: "Account Exists",
               description: "This email is already registered. Please log in instead.",
@@ -101,7 +84,7 @@ const Auth = () => {
           } else {
             toast({
               title: "Error",
-              description: error.message,
+              description: result.error || "Registration failed.",
               variant: "destructive",
             });
           }
@@ -146,6 +129,19 @@ const Auth = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="yourusername"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input

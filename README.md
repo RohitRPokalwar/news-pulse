@@ -3,10 +3,11 @@
 [![React](https://img.shields.io/badge/React-18.3.1-blue.svg)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue.svg)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-5.4.19-yellow.svg)](https://vitejs.dev/)
-[![Supabase](https://img.shields.io/badge/Supabase-2.76.1-green.svg)](https://supabase.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green.svg)](https://www.mongodb.com/atlas)
+[![Express](https://img.shields.io/badge/Express-4.x-lightgrey.svg)](https://expressjs.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.17-blue.svg)](https://tailwindcss.com/)
 
-A modern, responsive news aggregator that delivers trending headlines with visual analytics, bookmarking, and real-time updates. Built with React, TypeScript, and Supabase for a seamless user experience.
+A modern, responsive news aggregator that delivers trending headlines with visual analytics, bookmarking, AI-powered summarization, and personalized recommendations. Built with React, TypeScript, Express.js, and MongoDB for a seamless user experience.
 
 ## 🌟 Features
 
@@ -40,8 +41,11 @@ A modern, responsive news aggregator that delivers trending headlines with visua
 
 ### Backend & Database
 
-- **Supabase** - Backend-as-a-Service with PostgreSQL database
-- **Supabase Edge Functions** - Serverless functions for API calls
+- **Express.js** - RESTful API server
+- **MongoDB Atlas** - NoSQL database for data storage
+- **Mongoose** - MongoDB object modeling
+- **JWT** - JSON Web Token authentication
+- **OpenAI API** - AI-powered article summarization
 - **NewsAPI** - External news data provider
 
 ### Development Tools
@@ -80,30 +84,38 @@ Before running this project, make sure you have the following installed:
 
 3. **Set up environment variables**
 
-   Create a `.env.local` file in the root directory and add your Supabase credentials:
+   Create a `.env.local` file in the root directory for frontend:
 
    ```env
-   VITE_SUPABASE_URL=your_supabase_project_url
-   VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
+   VITE_API_BASE_URL=http://localhost:5000/api
    ```
 
-   You'll also need to set up the `NEWSAPI_KEY` in your Supabase Edge Functions environment.
+   Create a `.env` file in the `OneFolder` directory for backend:
 
-4. **Set up Supabase**
+   ```env
+   MONGODB_URI=your_mongodb_atlas_connection_string
+   OPENAI_API_KEY=your_openai_api_key
+   NEWS_API_KEY=your_newsapi_key
+   JWT_SECRET=your_jwt_secret_here
+   PORT=5000
+   ```
 
-   - Create a new project on [Supabase](https://supabase.com)
-   - Run the migration file to set up the database schema:
-     ```bash
-     supabase db push
-     ```
-   - Deploy the Edge Functions:
-     ```bash
-     supabase functions deploy fetch-news
-     supabase functions deploy get-bookmarks
-     supabase functions deploy manage-bookmark
-     ```
+4. **Set up MongoDB Atlas**
 
-5. **Start the development server**
+   - Create a MongoDB Atlas account and cluster
+   - Get your connection string and add it to the `.env` file
+   - Create a database named `newsapp`
+
+5. **Start the backend server**
+
+   ```bash
+   cd OneFolder
+   npm start
+   ```
+
+   The backend will be available at `http://localhost:5000`
+
+6. **Start the development server**
 
    ```bash
    npm run dev
@@ -137,24 +149,33 @@ Before running this project, make sure you have the following installed:
 
 ### Environment Variables
 
-| Variable                        | Description                                  | Required |
-| ------------------------------- | -------------------------------------------- | -------- |
-| `VITE_SUPABASE_URL`             | Your Supabase project URL                    | Yes      |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Your Supabase publishable key                | Yes      |
-| `NEWSAPI_KEY`                   | NewsAPI key (set in Supabase Edge Functions) | Yes      |
+| Variable            | Description                         | Required |
+| ------------------- | ----------------------------------- | -------- |
+| `VITE_API_BASE_URL` | Backend API base URL                | Yes      |
+| `MONGODB_URI`       | MongoDB Atlas connection string     | Yes      |
+| `OPENAI_API_KEY`    | OpenAI API key for summarization    | Yes      |
+| `NEWS_API_KEY`      | NewsAPI key for news fetching       | Yes      |
+| `JWT_SECRET`        | JWT secret for authentication       | Yes      |
+| `PORT`              | Backend server port (default: 5000) | No       |
 
-### Supabase Setup
+### MongoDB Setup
 
-The project uses Supabase for authentication and data storage. The database schema includes:
+The project uses MongoDB Atlas for data storage. The database schema includes:
 
-- `profiles` table: User profile information
-- `bookmarks` table: User-saved articles
+- `users` collection: User authentication and profile information
+- `articles` collection: News articles with metadata
+- `bookmarks` collection: User-saved articles
+- `interactions` collection: User interactions for recommendations
 
-Edge Functions handle:
+API Endpoints:
 
-- `fetch-news`: Retrieves news from NewsAPI
-- `get-bookmarks`: Fetches user bookmarks
-- `manage-bookmark`: Adds/removes bookmarks
+- `GET /api/news`: Fetches news from NewsAPI and stores in database
+- `GET /api/bookmarks`: Retrieves user bookmarks
+- `POST /api/bookmarks`: Adds/removes bookmarks
+- `GET /api/recommendations`: Generates personalized recommendations
+- `POST /api/summarize`: AI-powered article summarization
+- `POST /api/auth/register`: User registration
+- `POST /api/auth/login`: User authentication
 
 ## 🚀 Deployment
 
@@ -199,7 +220,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - **NewsAPI** for providing news data
-- **Supabase** for backend services
+- **MongoDB Atlas** for database services
+- **OpenAI** for AI-powered summarization
 - **shadcn/ui** for beautiful UI components
 - **Tailwind CSS** for styling utilities
 - **Framer Motion** for animations

@@ -8,8 +8,8 @@ import Analytics from "@/components/Analytics";
 import BookmarksPanel from "@/components/BookmarksPanel";
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuthNew";
+import apiClient from "@/integrations/api/client";
 
 export interface Article {
   title: string;
@@ -19,6 +19,7 @@ export interface Article {
   source: { name: string };
   publishedAt: string;
   author?: string;
+  isRecommended?: boolean;
 }
 
 const LS_KEY = "bookmarks_v1";
@@ -30,8 +31,9 @@ const Index = () => {
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showBookmarks, setShowBookmarks] = useState(false);
   const [bookmarks, setBookmarks] = useState<Article[]>([]);
+
   const { toast } = useToast();
-  const { user, session, loading: authLoading, signOut } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,28 +44,26 @@ const Index = () => {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user && session) {
+    if (user) {
       loadBookmarks();
     }
-  }, [user, session]);
+  }, [user]);
 
   useEffect(() => {
-    if (session) {
+    if (user) {
       fetchNews();
     }
-  }, [category, session]);
+  }, [category, user]);
 
   const fetchNews = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('fetch-news', {
-        body: { category }
+      const response = await apiClient.get('/news', {
+        params: { category }
       });
 
-      if (error) throw error;
-
-      if (data.articles) {
-        setArticles(data.articles.filter((a: Article) => a.title && a.description));
+      if (response.data.articles) {
+        setArticles(response.data.articles.filter((a: Article) => a.title && a.description));
       }
     } catch (error) {
       console.error('Error fetching news:', error);
@@ -78,30 +78,19 @@ const Index = () => {
   };
 
   const loadBookmarks = async () => {
-    if (!session) return;
+    if (!user) return;
 
     try {
-      const { data, error } = await supabase.functions.invoke('get-bookmarks');
-      if (error) throw error;
-
-      const bookmarkArticles = data.bookmarks.map((b: {
-        title: string;
-        description: string;
-        url: string;
-        url_to_image: string;
-        source_name: string;
-        published_at: string;
-        author: string;
-      }) => ({
-        title: b.title,
-        description: b.description,
-        url: b.url,
-        urlToImage: b.url_to_image,
-        source: { name: b.source_name },
-        publishedAt: b.published_at,
-        author: b.author,
+      const response = await apiClient.get('/bookmarks');
+      const bookmarkArticles = response.data.bookmarks.map((b: any) => ({
+        title: b.article.title,
+        description: b.article.description,
+        url: b.article.url,
+        urlToImage: b.article.urlToImage,
+        source: { name: b.article.source.name || b.article.source },
+        publishedAt: b.article.publishedAt instanceof Date ? b.article.publishedAt.toISOString() : b.article.publishedAt,
+        author: b.article.author,
       }));
-
       setBookmarks(bookmarkArticles);
       try {
         localStorage.setItem(LS_KEY, JSON.stringify(bookmarkArticles));
@@ -125,8 +114,10 @@ const Index = () => {
     }
   };
 
+
+
   const toggleBookmark = async (article: Article) => {
-    if (!session) {
+    if (!user) {
       toast({
         title: "Please sign in",
         description: "You need to be signed in to bookmark articles",
@@ -136,24 +127,21 @@ const Index = () => {
     }
 
     const isBookmarked = bookmarks.some((b) => b.url === article.url);
-    
+
     try {
-      const { error } = await supabase.functions.invoke('manage-bookmark', {
-        body: {
-          action: isBookmarked ? 'remove' : 'add',
-          article
-        }
+      await apiClient.post('/bookmarks', {
+        action: isBookmarked ? 'remove' : 'add',
+        articleData: article
       });
 
-      if (error) throw error;
-
       if (isBookmarked) {
-        setBookmarks(bookmarks.filter((b) => b.url !== article.url));
-        toast({ title: "Removed from bookmarks" });
+        toast({ title: "Removed from bookmarks", variant: "default" });
       } else {
-        setBookmarks([...bookmarks, article]);
         toast({ title: "Added to bookmarks", variant: "default" });
       }
+
+      // Reload bookmarks to sync with server
+      loadBookmarks();
     } catch (error) {
       console.error('Error managing bookmark:', error);
       toast({

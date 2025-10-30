@@ -1,10 +1,13 @@
-import { ExternalLink, Bookmark, BookmarkCheck, Calendar, User } from "lucide-react";
-import { motion } from "framer-motion";
+import { ExternalLink, Bookmark, BookmarkCheck, Calendar, User, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Article } from "@/pages/Index";
 import { format } from "date-fns";
+import apiClient from "@/integrations/api/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface NewsCardProps {
   article: Article;
@@ -13,6 +16,39 @@ interface NewsCardProps {
 }
 
 const NewsCard = ({ article, isBookmarked, onToggleBookmark }: NewsCardProps) => {
+  const [showSummary, setShowSummary] = useState(false);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const { toast } = useToast();
+
+  const handleSummarize = async () => {
+    if (summary) {
+      setShowSummary(!showSummary);
+      return;
+    }
+
+    setLoadingSummary(true);
+    try {
+      const response = await apiClient.post('/summarize', {
+        title: article.title,
+        description: article.description,
+        url: article.url
+      });
+
+      setSummary(response.data.summary);
+      setShowSummary(true);
+    } catch (error) {
+      console.error('Error summarizing article:', error);
+      toast({
+        title: "Summary failed",
+        description: "Unable to generate article summary. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingSummary(false);
+    }
+  };
+
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -69,6 +105,26 @@ const NewsCard = ({ article, isBookmarked, onToggleBookmark }: NewsCardProps) =>
         <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
           {article.description}
         </p>
+
+        {/* AI Summary Section */}
+        <AnimatePresence>
+          {showSummary && summary && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mb-3 p-3 bg-accent/10 rounded-lg border border-accent/20"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-4 h-4 text-accent" />
+                <span className="text-sm font-medium text-accent">AI Summary</span>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {summary}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </CardContent>
 
       <CardFooter className="p-5 pt-0 flex flex-col gap-3">
@@ -86,21 +142,53 @@ const NewsCard = ({ article, isBookmarked, onToggleBookmark }: NewsCardProps) =>
           )}
         </div>
 
-        {/* Read More Button */}
-        <a
-          href={article.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-full"
-        >
+        {/* Action Buttons */}
+        <div className="flex gap-2 w-full">
+          {/* Summarize Button */}
           <Button
             variant="outline"
-            className="w-full gap-2 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all"
+            size="sm"
+            onClick={handleSummarize}
+            disabled={loadingSummary}
+            className="flex-1 gap-2"
           >
-            Read Full Article
-            <ExternalLink className="w-4 h-4" />
+            {loadingSummary ? (
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              >
+                <Sparkles className="w-4 h-4" />
+              </motion.div>
+            ) : showSummary && summary ? (
+              <>
+                <ChevronUp className="w-4 h-4" />
+                Hide Summary
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" />
+                Summarize
+              </>
+            )}
           </Button>
-        </a>
+
+          {/* Read More Button */}
+          <a
+            href={article.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1"
+          >
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-2 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all"
+            >
+              Read Full
+              <ExternalLink className="w-4 h-4" />
+            </Button>
+          </a>
+        </div>
       </CardFooter>
     </Card>
     </motion.div>
